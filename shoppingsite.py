@@ -60,16 +60,6 @@ def show_shopping_cart():
 
     # TODO: Display the contents of the shopping cart.
 
-    # melon_objects = []
-    # total_cost = 0.00
-
-    # for item in session['cart']:
-    #     melon_objects.append(item)
-
-    # for melon in melon_objects:
-    #     subtotal = melon.qty * melon.price
-    #     total_cost += subtotal
-
     # The logic here will be something like:
     #
     # - get the cart dictionary from the session
@@ -86,10 +76,19 @@ def show_shopping_cart():
     # Make sure your function can also handle the case wherein no cart has
     # been added to the session
 
+    cart = session['cart']
+    cart_list = []
+    total_cost = 0
 
+    for melon_id in cart:
+        melon = melons.get_by_id(melon_id)
+        melon.quantity = cart['melon_id']
+        melon.total_price = melon.price * melon.quantity
+        cart_list.append(melon)
+        total_cost += melon.total_price
 
-
-    return render_template("cart.html")
+    return render_template("cart.html", cart_list=cart_list,
+                           total_cost=total_cost)
 
 
 @app.route("/add_to_cart/<melon_id>")
@@ -100,7 +99,16 @@ def add_to_cart(melon_id):
     page and display a confirmation message: 'Melon successfully added to
     cart'."""
 
-    # TODO: Finish shopping cart functionality
+    if 'cart' not in session:
+        session['cart'] = {melon_id : 1}
+    else:
+        if melon_id in session['cart']:
+            session['cart'][melon_id] += 1
+        else:
+            session['cart'][melon_id] = 1
+
+    flash("The melon is added to your cart. Would you like to check your cart?")
+
 
     # The logic here should be something like:
     #
@@ -110,9 +118,8 @@ def add_to_cart(melon_id):
     # - increment the count for that melon id by 1
     # - flash a success message
     # - redirect the user to the cart page
-
-    return "Oops! This needs to be implemented!"
-
+# 
+    return redirect("/cart")
 
 @app.route("/login", methods=["GET"])
 def show_login():
